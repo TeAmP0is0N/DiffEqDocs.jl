@@ -860,8 +860,8 @@ First let's use the objective function to plot the likelihood landscape:
 
 ```julia
 using Plots; plotly()
-range = 0.5:0.1:5.0
-heatmap(range,range,[obj([j,i]) for i in range, j in range],
+prange = 0.5:0.1:5.0
+heatmap(prange,prange,[obj([j,i]) for i in prange, j in prange],
         yscale=:log10,xlabel="Parameter 1",ylabel="Parameter 2",
         title="Likelihood Landscape")
 ```
@@ -869,14 +869,14 @@ heatmap(range,range,[obj([j,i]) for i in range, j in range],
 ![2 Parameter Likelihood](../assets/2paramlike.png)
 
 Recall that this is the negative loglikelihood and thus the minimum is the
-maximum of the likelihood. There is a clear valley where the second parameter
-is 1.5, while the first parameter's likelihood is more muddled. By taking a
+maximum of the likelihood. There is a clear valley where the first parameter
+is 1.5, while the second parameter's likelihood is more muddled. By taking a
 one-dimensional slice:
 
 ```julia
-plot(range,[obj([i,1.0]) for i in range],lw=3,
-     title="Parameter 1 Likelihood (Parameter 2 = 1.5)",
-     xlabel = "Parameter 1", ylabel = "Objective Function Value")
+plot(prange,[obj([1.5,i]) for i in prange],lw=3,
+     title="Parameter 2 Likelihood (Parameter 1 = 1.5)",
+     xlabel = "Parameter 2", ylabel = "Objective Function Value")
 ```
 
 ![1 Parameter Likelihood](../assets/1paramlike.png)
@@ -916,11 +916,11 @@ Fitness: -739.658433715
 
 This shows that it found the true parameters as the best fit to the likelihood.
 
-## Parameter Estimation for Stochastic Differential Equations and Monte Carlo
+## Parameter Estimation for Stochastic Differential Equations and Ensembles
 
 We can use any `DEProblem`, which not only includes `DAEProblem` and `DDEProblem`s,
 but also stochastic problems. In this case, let's use the generalized maximum
-likelihood to fit the parameters of an SDE's Monte Carlo evaluation.
+likelihood to fit the parameters of an SDE's ensemble evaluation.
 
 Let's use the same Lotka-Volterra equation as before, but this time add noise:
 
@@ -955,12 +955,12 @@ aggregate_data = convert(Array,VectorOfArray([generate_data(t) for i in 1:10000]
 ```
 
 Now let's estimate the parameters. Instead of using single runs from the SDE, we
-will use a `MonteCarloProblem`. This means that it will solve the SDE `N` times
+will use a `EnsembleProblem`. This means that it will solve the SDE `N` times
 to come up with an approximate probability distribution at each time point and
 use that in the likelihood estimate.
 
 ```julia
-monte_prob = MonteCarloProblem(prob)
+monte_prob = EnsembleProblem(prob)
 ```
 
 We use Optim.jl for optimization below

@@ -16,11 +16,11 @@ makedocs(modules=[DiffEqBase,DiffEqProblemLibrary,DiffEqBiological,ODEProblemLib
          doctest=false, clean=true,
          format = Documenter.HTML(analytics = "UA-90474609-3",
                                   assets = ["assets/favicon.ico"],
-                                  canonical="https://docs.sciml.ai/stable/"),
+                                  canonical="https://diffeq.sciml.ai/stable/"),
          sitename="DifferentialEquations.jl",
          authors="Chris Rackauckas",
          pages = Any[
-         "Home" => "index.md",
+         "DifferentialEquations.jl: Scientific Machine Learning (SciML) Enabled Simulation and Estimation" => "index.md",
          "Tutorials" => Any[
            "tutorials/ode_example.md",
            "tutorials/advanced_ode_example.md",

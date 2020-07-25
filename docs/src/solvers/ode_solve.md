@@ -131,6 +131,33 @@ allow for sophisticated event handling, etc. On stiff ODEs these algorithms
 again consistently among the top. OrdinaryDiffEq.jl is recommended for most ODE
 problems.
 
+#### Linear Methods
+
+##### u' = A(t)u solvers
+
+- `MagnusMidpoint` - Second order Magnus Midpoint method.
+- `MagnusLeapfrog`- Second order Magnus Leapfrog method.
+- `MagnusGauss4` - Fourth order Magnus method approximated using a two stage Gauss quadrature.
+- `MagnusGL4`- Fourth order Magnus method approximated using Gauss-Legendre quadrature.
+- `MagnusNC6`- Sixth order Magnus method approximated using Newton-Cotes quadrature.
+- `MagnusGL6`- Sixth order Magnus method approximated using Gauss-Legendre quadrature.
+- `MagnusNC8`- Eighth order Magnus method approximated using Newton-Cotes quadrature.
+- `MagnusGL8`- Eighth order Magnus method approximated using Gauss-Legendre quadrature.
+
+Example:
+
+```julia
+function update_func(A,u,p,t)
+    A[1,1] = cos(t)
+    A[2,1] = sin(t)
+    A[1,2] = -sin(t)
+    A[2,2] = cos(t)
+end
+A = DiffEqArrayOperator(ones(2,2),update_func=update_func)
+prob = ODEProblem(A, ones(2), (1.0, 6.0))
+sol = solve(prob,MagnusGL6(),dt=1/10)
+```
+
 #### Explicit Runge-Kutta Methods
 
 - `Euler`- The canonical forward Euler method. Fixed timestep only.
@@ -353,7 +380,7 @@ So the above implementation of `f` becomes valid.
 
 The following are adaptive order, adaptive step size extrapolation methods:
 
-- `AitkenNevillie` - Euler extrapolation using Aitken-Neville with the Romberg Sequence.
+- `AitkenNeville` - Euler extrapolation using Aitken-Neville with the Romberg Sequence.
 - `ExtrapolationMidpointDeuflhard` - Midpoint extrapolation using Barycentric coordinates
 - `ExtrapolationMidpointHairerWanner` - Midpoint extrapolation using Barycentric coordinates,
   following Hairer's `ODEX` in the adaptivity behavior.
@@ -381,7 +408,7 @@ alg = ExtrapolationMidpointDeuflhard(max_order=7,min_order=4,init_order=4,sequen
 solve(prob,alg)
 ```
 
-Note that the order that is referred to is the extrapolation order. For `AitkenNevillie`
+Note that the order that is referred to is the extrapolation order. For `AitkenNeville`
 this is the order of the method, for the others an extrapolation order of `n`
 gives an order `2(n+1)` method.
 
@@ -453,15 +480,19 @@ These methods require a choice of `dt`.
 - `Kvaerno3` - An A-L stable stiffly-accurate 3rd order ESDIRK method
 - `KenCarp3` - An A-L stable stiffly-accurate 3rd order ESDIRK method with splitting
 - `Cash4` - An A-L stable 4th order SDIRK method
-- `Hairer4` - An A-L stable 4rd order SDIRK method
-- `Hairer42` - An A-L stable 4rd order SDIRK method
-- `Kvaerno4` - An A-L stable stiffly-accurate 4rd order ESDIRK method
-- `KenCarp4` - An A-L stable stiffly-accurate 4rd order ESDIRK method with splitting
-- `Kvaerno5` - An A-L stable stiffly-accurate 5rd order ESDIRK method
-- `KenCarp5` - An A-L stable stiffly-accurate 5rd order ESDIRK method with splitting
+- `Hairer4` - An A-L stable 4th order SDIRK method
+- `Hairer42` - An A-L stable 4th order SDIRK method
+- `Kvaerno4` - An A-L stable stiffly-accurate 4th order ESDIRK method
+- `KenCarp4` - An A-L stable stiffly-accurate 4th order ESDIRK method with splitting
+- `KenCarp47` - An A-L stable stiffly-accurate 4th order seven-stage ESDIRK method with splitting
+- `Kvaerno5` - An A-L stable stiffly-accurate 5th order ESDIRK method
+- `KenCarp5` - An A-L stable stiffly-accurate 5th order ESDIRK method with splitting
+- `KenCarp58` - An A-L stable stiffly-accurate 5th order eight-stage ESDIRK method with splitting
 
 #### Fully-Implicit Runge-Kutta Methods (FIRK)
 
+- `RadauIIA3` - An A-B-L stable fully implicit Runge-Kutta method with internal
+  tableau complex basis transform for efficiency.
 - `RadauIIA5` - An A-B-L stable fully implicit Runge-Kutta method with internal
   tableau complex basis transform for efficiency.
 
@@ -563,7 +594,7 @@ methods have the additional argument:
 To override, utilize the keyword arguments. For example:
 
 ```julia
-alg = ImplicitEulerExtrapolation(max_order=7,min_order=4,init_order=4,sequence=:bulirsch)
+alg = ImplicitDeuflhardExtrapolation(max_order=7,min_order=4,init_order=4,sequence=:bulirsch)
 solve(prob,alg)
 ```
 
@@ -1041,7 +1072,7 @@ to solve both stiff and non-stiff equations.
 
   - `lsoda` - The LSODA wrapper algorithm.
 
-Note that this setup is not automatically included with DifferentialEquaitons.jl.
+Note that this setup is not automatically included with DifferentialEquations.jl.
 To use the following algorithms, you must install and use LSODA.jl:
 
 ```julia
@@ -1062,7 +1093,7 @@ limitations compared to OrdinaryDiffEq.jl and are not generally faster.
   - `GPUSimpleATsit5` - A version of `SimpleATsit5` without the integrator
     interface. Only allows `solve`.
 
-Note that this setup is not automatically included with DifferentialEquaitons.jl.
+Note that this setup is not automatically included with DifferentialEquations.jl.
 To use the following algorithms, you must install and use SimpleDiffEq.jl:
 
 ```julia
@@ -1073,7 +1104,7 @@ using SimpleDiffEq
 ### ODE.jl
 
 
-Note that this setup is not automatically included with DifferentialEquaitons.jl.
+Note that this setup is not automatically included with DifferentialEquations.jl.
 To use the following algorithms, you must install and use ODE.jl:
 
 ```julia
@@ -1095,7 +1126,7 @@ detection, and [discrete variables need to be updated appropriately](@ref diffeq
 
 ### MATLABDiffEq.jl
 
-Note that this setup is not automatically included with DifferentialEquaitons.jl.
+Note that this setup is not automatically included with DifferentialEquations.jl.
 To use the following algorithms, you must install and use MATLABDiffEq.jl:
 
 ```julia
@@ -1126,7 +1157,7 @@ but it is still around 1000x slower than the pure-Julia methods and thus should 
 sparingly.
 
 Note that this setup is not automatically included
-with DifferentialEquaitons.jl. To use the following algorithms, you must install
+with DifferentialEquations.jl. To use the following algorithms, you must install
 and use SciPyDiffEq.jl:
 
 ```julia
@@ -1150,7 +1181,7 @@ and benchmarking. This wrapper is around 1000x slower than the pure-Julia method
 from directly using R) and thus should probably be used sparingly.
 
 Note that this setup is not automatically included
-with DifferentialEquaitons.jl. To use the following algorithms, you must install
+with DifferentialEquations.jl. To use the following algorithms, you must install
 and use deSolveDiffEq.jl:
 
 ```julia
@@ -1179,10 +1210,8 @@ The available methods are:
 
 ### GeometricIntegrators.jl
 
-#### Note: This package currently segfaults on non-Linux Julia v1.0!
-
 GeometricIntegrators.jl is a set of fixed timestep algorithms written in Julia.
-Note that this setup is not automatically included with DifferentialEquaitons.jl.
+Note that this setup is not automatically included with DifferentialEquations.jl.
 To use the following algorithms, you must install and use
 GeometricIntegratorsDiffEq.jl:
 
@@ -1211,7 +1240,7 @@ Note that all of these methods require the user supplies `dt`.
 Bridge.jl is a set of fixed timestep algorithms written in Julia. These methods
 are made and optimized for out-of-place functions on immutable (static vector)
 types. Note that this setup is not automatically included with
-DifferentialEquaitons.jl. To use the following algorithms, you must install and
+DifferentialEquations.jl. To use the following algorithms, you must install and
 use BridgeDiffEq.jl:
 
 ```julia
@@ -1227,7 +1256,7 @@ using BridgeDiffEq
 TaylorIntegration.jl is a pure-Julia implementation of an adaptive order Taylor
 series method for high accuracy integration of ODEs. These methods are optimized
 when the absolute tolerance is required to be very low.
-Note that this setup is not automatically included with DifferentialEquaitons.jl.
+Note that this setup is not automatically included with DifferentialEquations.jl.
 To use the following algorithms, you must install and
 use TaylorIntegration.jl:
 
@@ -1244,7 +1273,7 @@ Note: this method is much faster if you put `@taylorize` on your derivative func
 
 QuDiffEq.jl is a pacakge for solving differential equations using quantum algorithm. It makes use of the Yao framework for simulating quantum circuits.
 
-Note that this setup is not automatically included with DifferentialEquaitons.jl.
+Note that this setup is not automatically included with DifferentialEquations.jl.
 To use the following algorithms, you must install and
 use QuDiffEq.jl:
 
@@ -1262,7 +1291,7 @@ This method trains a neural network using Flux.jl to approximate the solution of
 ODE. Currently this method isn't competitive but it is a fun curiosity that will be
 improved with future integration with Zygote.
 
-Note that this setup is not automatically included with DifferentialEquaitons.jl.
+Note that this setup is not automatically included with DifferentialEquations.jl.
 To use the following algorithms, you must install and
 use NeuralNetDiffEq.jl:
 
@@ -1277,7 +1306,7 @@ using NeuralNetDiffEq
 
 ### List of Supplied Tableaus
 
-A large variety of tableaus have been supplied by default via DiffEqDevTools.jl.
+A large variety of tableaus have been supplied by default, via DiffEqDevTools.jl.
 The list of tableaus can be found in [the developer docs](https://devdocs.juliadiffeq.org/dev/internals/tableaus/).
 To use them, note you must install the library:
 
